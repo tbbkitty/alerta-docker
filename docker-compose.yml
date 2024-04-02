@@ -1,0 +1,36 @@
+version: '2.1'
+services:
+  web:
+    image: alerta/alerta-web
+    ports:
+      - "8080:8080"
+    volumes: # This makes config not supported by docker ENV persistent files.
+             # The files need to have been created beforehand!
+      - /opt/alerta/config/alertad.conf:/app/alertad.conf
+      - /opt/alerta/config/config.json:/web/config.json
+      - /opt/alerta/config/templates:/opt/alerta/config/templates
+    environment:
+#      - DEBUG=1  # remove # to enable
+      - DATABASE_URL=postgres://<db-user>:<db-user-pw>@<db-ip-or-domain.net>:5432/<db-name>
+      - AUTH_REQUIRED=True
+        # OpenID Connect
+        # This is how i got keycloak running, as the current integration has some issues.
+      - AUTH_PROVIDER=openid
+      - OIDC_ISSUER_URL=https://keycloak.mydomain.net/realms/my-realm
+      - OIDC_AUTH_URL=https://keycloak.mydomain.net/realms/my-realm/protocol/openid-connect/auth
+      - OIDC_LOGOUT_URL=https://keycloak.mydomain.net/realms/my-realm/protocol/openid-connect/logout
+      - OIDC_VERIFY_TOKEN=False
+      - OIDC_ROLE_CLAIM=roles,openid 
+      - ALLOWED_OIDC_ROLES=admin
+      - OAUTH2_CLIENT_ID=alerta
+      - OAUTH2_CLIENT_SECRET=4TmGFvWRKg4vT4rZ6Vos1emq5S7k8ea8
+      # Alerta config
+      - ADMIN_KEY=<admin-key>
+      - PLUGINS=reject,blackout,normalise,enhance,telegram
+      - DEFAULT_ENVIRONMENT=Production
+      # Telegram API
+      - TELEGRAM_TOKEN=<telegram-token>
+      - TELEGRAM_CHAT_ID=<chat-id>
+      - TELEGRAM_TEMPLATE=/opt/alerta/config/templates/telegram.json
+      
+    restart: always
