@@ -1,0 +1,7 @@
+**Alerta Event**
+```
+Resource: {{ resource }}
+Event: {{ event }}
+Note: {{ text }}
+Event ID: {{ id }}
+```
